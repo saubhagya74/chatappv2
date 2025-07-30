@@ -114,7 +114,7 @@ namespace app.Controllers
                     issuer: _configuration.GetValue<string>("AppSettings:Issuer"),
                     audience: _configuration.GetValue<string>("AppSettings:Audience"),
                     claims: claims,
-                    expires: DateTime.UtcNow.AddMinutes(10), // shorter expiry = better token rotation
+                    expires: DateTime.UtcNow.AddMinutes(30), // shorter expiry = better token rotation
                     signingCredentials: credentials
                 );
 
