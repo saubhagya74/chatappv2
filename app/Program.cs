@@ -75,7 +75,7 @@ namespace app
             {
                 options.AddPolicy("AllowAngularDevClient", policy =>
                 {
-                    policy.WithOrigins("http://52.86.249.52")
+                    policy.WithOrigins("http://18.235.166.132")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials(); // needed for cookies or SignalR
@@ -106,8 +106,8 @@ namespace app
             }
 
 
-            app.UseRouting(); //  Required before CORS/Auth
-
+            app.UseStaticFiles();  // Required for wwwroot to be served
+app.UseRouting();
             app.UseCors("AllowAngularDevClient"); //  Must come before Auth
 
             app.UseAuthentication();

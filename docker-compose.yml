@@ -10,6 +10,8 @@ services:
       - db
     environment:
       - ConnectionStrings__DatabaseConnection=Host=db;Port=5432;Database=app;Username=postgres;Password=poplm10@
+    volumes:
+      - ./app/wwwroot:/app/wwwroot
 
   frontend:
     build:
