@@ -1,0 +1,82 @@
+.video-chat-modal {
+  background: #ffffff;
+  border-radius: 1rem;
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
+  padding: 1.5rem;
+  width: 90%;
+  max-width: 420px;
+  margin: 2rem auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  z-index: 1000;
+  position: relative;
+}
+
+.video-chat-header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+
+.video-chat-header span {
+  font-size: 1.2rem;
+  font-weight: 600;
+  color: #333;
+}
+
+.end-call-btn {
+  background: #ff4d4f;
+  color: white;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.4rem 0.8rem;
+  font-size: 1rem;
+  cursor: pointer;
+}
+
+.video-chat-body {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1rem;
+  width: 100%;
+}
+
+.video-el {
+  width: 100%;
+  max-width: 360px;
+  height: 200px;
+  border-radius: 0.75rem;
+  background: #d6f5ff;
+  object-fit: cover;
+  box-shadow: 0 4px 12px rgba(0, 174, 239, 0.3);
+}
+
+.video-el.remote {
+  border: 2px solid #0093c4;
+}
+
+.video-chat-actions {
+  display: flex;
+  justify-content: center;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.video-chat-actions button {
+  background-color: #0093c4;
+  color: #fff;
+  border: none;
+  border-radius: 0.5rem;
+  padding: 0.6rem 1.2rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background-color 0.2s ease-in-out;
+}
+
+.video-chat-actions button:hover {
+  background-color: #007aa0;
+}

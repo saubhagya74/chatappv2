@@ -1,0 +1,550 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Messenger Clone</title>
+    <link rel="stylesheet" href="chat.component.css" />
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="messenger-app">
+      <aside class="left-nav">
+        <div class="nav-logo">
+          <svg
+            width="48"
+            height="48"
+            viewBox="0 0 48 48"
+            fill="none"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <polygon points="24,6 42,42 6,42" fill="#fff" />
+            <polygon points="24,14 36,38 12,38" fill="#5283ff" />
+          </svg>
+        </div>
+        <nav class="nav-icons">
+          <button class="nav-btn" (click)="toggleHomePage()">
+            <i class="fas fa-home"></i>
+          </button>
+
+          <button class="nav-btn" (click)="toggleSearchWindow()">
+            <i class="fas fa-search"></i>
+          </button>
+          <div class="search-panel-wrapper" [class.open]="searchWindowOpen">
+            <button class="close-panel-btn" (click)="toggleSearchWindow()">
+              <i class="fas fa-times"></i>
+            </button>
+            <div class="search-content">
+              <div class="search-header">Search Users</div>
+              <div class="search-input-container">
+                <input
+                  type="text"
+                  [(ngModel)]="searchedName"
+                  (keyup.enter)="searchUser()"
+                  placeholder="Search by username..."
+                  class="search-input"
+                />
+                <button class="search-btn" (click)="searchUser()">
+                  <i class="fas fa-arrow-right"></i>
+                </button>
+              </div>
+              <div *ngIf="searchError" class="search-message error">
+                {{ searchError }}
+              </div>
+              <div *ngIf="searchReturned" class="search-result-card">
+                <div class="search-result-header">
+                  <img
+                    [src]="
+                      searchReturned.searchedProfilePicUrl || defaultProfilePic
+                    "
+                    alt="Profile Picture"
+                    class="search-result-avatar"
+                  />
+                  <div class="search-result-info">
+                    <span class="search-result-name">{{
+                      searchReturned.searchedUserName
+                    }}</span>
+                    <span class="search-result-friends"
+                      >{{ searchReturned.searchedNoOfFriends }} Friends</span
+                    >
+                    <button class="search-result-id-btn">
+                      ID: {{ searchReturned.searchedUserId }}
+                    </button>
+                  </div>
+                </div>
+                <div class="search-result-actions">
+                  <button
+                    class="action-btn primary-btn"
+                    (click)="sendFriendRequest(searchReturned.searchedUserId)"
+                  >
+                    Send Friend Request
+                  </button>
+                  <div class="message-user-section">
+                    <input
+                      type="text"
+                      [(ngModel)]="messageText"
+                      placeholder="Type a message..."
+                      class="message-input"
+                    />
+                    <button
+                      class="action-btn send-message-btn"
+                      (click)="
+                        sendMessageToUser(
+                          searchReturned.searchedUserName,
+                          messageText
+                        )
+                      "
+                    >
+                      Send Message
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div *ngIf="searchActionMessage" class="search-message success">
+                {{ searchActionMessage }}
+              </div>
+            </div>
+          </div>
+
+          <button class="nav-btn" (click)="toggleNotificationWindow()">
+            <i class="fas fa-bell"></i>
+          </button>
+          <div
+            class="notification-panel-wrapper"
+            [class.open]="notificationWindowOpen"
+          >
+            <button
+              class="close-panel-btn"
+              (click)="toggleNotificationWindow()"
+            >
+              <i class="fas fa-times"></i>
+            </button>
+            <div class="notification-content">
+              <div class="notification-header">Notifications</div>
+              <div
+                *ngIf="notificationErrors"
+                class="notification-message error"
+              >
+                {{ notificationErrors }}
+              </div>
+              <div
+                *ngIf="!notifications || notifications.length === 0"
+                class="notification-message empty"
+              >
+                No notifications.
+              </div>
+              <ul
+                *ngIf="notifications && notifications.length > 0"
+                class="notification-list"
+              >
+                <li
+                  *ngFor="let note of notifications"
+                  class="notification-item"
+                >
+                  <div class="notification-details">
+                    <div class="notification-user-info">
+                      <img
+                        [src]="note.requesterPicUrl || defaultProfilePic"
+                        width="36"
+                        height="36"
+                        class="friend-avatar"
+                        alt="Requester"
+                      />
+                      <span class="notification-username">{{
+                        note.requesterName
+                      }}</span>
+                    </div>
+                    <span class="notification-action-text"
+                      >sent a friend request to</span
+                    >
+                    <div class="notification-user-info">
+                      <img
+                        [src]="note.requestToPicUrl || defaultProfilePic"
+                        width="36"
+                        height="36"
+                        class="friend-avatar"
+                        alt="Receiver"
+                      />
+                      <span class="notification-username">{{
+                        note.requestToName
+                      }}</span>
+                    </div>
+                    <div class="notification-meta">
+                      <strong>Time:</strong>
+                      {{ note.requestTime | date : "short" }}<br />
+                      <strong>Status:</strong>
+                      {{ note.requestStatus | titlecase }}
+                    </div>
+                  </div>
+                  <div
+                    class="notification-actions"
+                    *ngIf="
+                      note.requestStatus === 'pending' &&
+                      note.requestToId === currentUserId
+                    "
+                  >
+                    <button
+                      class="action-btn accept-btn"
+                      (click)="acceptOrDeclineRequest(note.requesterId, true)"
+                    >
+                      Accept
+                    </button>
+                    <button
+                      class="action-btn decline-btn"
+                      (click)="acceptOrDeclineRequest(note.requesterId, false)"
+                    >
+                      Decline
+                    </button>
+                  </div>
+                </li>
+              </ul>
+            </div>
+          </div>
+
+          <button class="nav-btn" (click)="toggleFriendsWindow()">
+            <i class="fas fa-users"></i>
+          </button>
+          <div class="friends-panel-wrapper" [class.open]="friendsWindowOpen">
+            <button class="close-panel-btn" (click)="toggleFriendsWindow()">
+              <i class="fas fa-times"></i>
+            </button>
+            <div class="friends-content">
+              <div class="friends-header">Your Friends</div>
+              <div *ngIf="loadfriendsErrors" class="friends-message error">
+                {{ loadfriendsErrors }}
+              </div>
+              <div
+                *ngIf="!loadfriends || loadfriends.length === 0"
+                class="friends-message empty"
+              >
+                No friends found. Start adding some!
+              </div>
+              <ul
+                *ngIf="loadfriends && loadfriends.length > 0"
+                class="friends-list"
+              >
+                <li *ngFor="let friend of loadfriends" class="friend-item">
+                  <img
+                    [src]="friend.profilePicUrl || defaultProfilePic"
+                    class="friend-avatar"
+                    width="40"
+                    height="40"
+                    alt="{{ friend.userName }}'s avatar"
+                  />
+                  <span class="friend-name">{{ friend.userName }}</span>
+                </li>
+              </ul>
+            </div>
+          </div>
+          <button class="nav-btn">
+            <i class="fas fa-plus-circle"></i>
+          </button>
+        </nav>
+        <div class="nav-footer">
+          <div class="user-avatar-small" (click)="toggleProfileWindow()">
+            <img
+              [src]="profileReturned?.profilePicUrl || defaultProfilePic"
+              alt="User Avatar"
+            />
+          </div>
+        </div>
+
+        <div class="profile-panel-wrapper" [class.open]="profileWindowOpen">
+          <button class="close-panel-btn" (click)="toggleProfileWindow()">
+            <i class="fas fa-times"></i>
+          </button>
+
+          <div class="profile-content">
+            <div class="profile-header">My Profile</div>
+
+            <div *ngIf="profileerror" class="profile-message error">
+              {{ profileerror }}
+            </div>
+
+            <div class="profile-pic-container">
+              <img
+                [src]="profileReturned?.profilePicUrl || defaultProfilePic"
+                class="profile-pic"
+                alt="Profile Pic"
+              />
+              <input
+                type="file"
+                #fileInput
+                (change)="onFileSelected2($event)"
+                accept="image/*"
+                style="display: none"
+              />
+              <button class="set-pfp-btn" (click)="fileInput.click()">
+                Set Profile Pic
+              </button>
+            </div>
+
+            <div class="profile-info">
+              <div><strong>Name:</strong> {{ profileReturned?.userName }}</div>
+              <div><strong>User ID:</strong> {{ profileReturned?.userId }}</div>
+              <div>
+                <strong>Friends:</strong> {{ profileReturned?.numOfFriends }}
+              </div>
+            </div>
+
+            <br />
+
+            <!-- Upload Post Form (integrated here) -->
+            <div class="slider open">
+              <div class="slider-header">
+                <h2>Upload Post</h2>
+              </div>
+
+              <form
+                (ngSubmit)="submitPost()"
+                #postForm="ngForm"
+                enctype="multipart/form-data"
+              >
+                <div class="form-group">
+                  <label for="caption">Caption</label>
+                  <input
+                    type="text"
+                    id="caption"
+                    name="caption"
+                    [(ngModel)]="postAbout"
+                    required
+                    placeholder="What's on your mind?"
+                  />
+                </div>
+
+                <div class="form-group">
+                  <label for="file">Select Image</label>
+                  <input
+                    type="file"
+                    id="file"
+                    name="file"
+                    (change)="onFileSelected($event)"
+                    accept="image/*"
+                    required
+                  />
+                </div>
+
+                <button
+                  type="submit"
+                  [disabled]="isUploading || !selectedFile || !postAbout"
+                >
+                  {{ isUploading ? "Uploading..." : "Upload Post" }}
+                </button>
+                <div *ngIf="uploadMessage" class="message">
+                  {{ uploadMessage }}
+                </div>
+              </form>
+            </div>
+
+            <button class="nav-btn settings-btn">
+              <i class="fas fa-cog"></i>
+            </button>
+          </div>
+        </div>
+      </aside>
+
+      <section class="chat-list-panel">
+        <div class="chat-list-header">
+          <h2>Chats</h2>
+          <div class="header-actions">
+            <button class="icon-btn"><i class="fas fa-video"></i></button>
+            <button class="icon-btn"><i class="fas fa-edit"></i></button>
+          </div>
+        </div>
+        <div class="search-bar">
+          <i class="fas fa-search"></i>
+          <input type="text" placeholder="Search Messenger" />
+        </div>
+        <ul class="chat-conversations">
+          <li
+            class="chat-item"
+            *ngFor="let user of loadUsersReturned"
+            [class.active]="user.userId === receiverId"
+            (click)="selectUser(user)"
+          >
+            <div class="chat-avatar">
+              <img
+                [src]="user.profilePicUrl || defaultProfilePic"
+                alt="Avatar"
+                width="50"
+                height="50"
+              />
+            </div>
+            <div class="chat-info">
+              <div class="chat-name">{{ user.userName }}</div>
+              <div class="last-message">
+                {{
+                  user.userName !== currentUserName ? "Click to text" : "You"
+                }}
+              </div>
+            </div>
+            <div class="chat-meta">
+              <div class="time">
+                {{ user.userId === receiverId ? "Active" : "" }}
+              </div>
+            </div>
+          </li>
+        </ul>
+      </section>
+
+      <div class="main-chat-area">
+        <div class="chat-interface-content" *ngIf="!homePage">
+          <div class="chat-area-header">
+            <div class="chat-partner-info">
+              <div class="chat-avatar">
+                <img
+                  [src]="getProfilePicUrl(receiverId)"
+                  alt="{{ receiverName || 'User Avatar' }}"
+                  width="50"
+                  height="50"
+                />
+              </div>
+              <div class="info-text">
+                <div class="chat-partner-name">
+                  {{ receiverName || "Select a friend!" }}
+                </div>
+                <div class="chat-partner-status">Active now</div>
+              </div>
+            </div>
+            <div class="header-actions">
+              <button
+                class="icon-btn"
+                title="Video call"
+                (click)="startVideoCall()"
+              >
+                <i class="fas fa-video"></i>
+              </button>
+              <button class="icon-btn" title="Info">
+                <i class="fas fa-info-circle"></i>
+              </button>
+            </div>
+          </div>
+          <app-video-chat
+            *ngIf="showVideoChat"
+            [remoteUserId]="receiverId"
+            (close)="showVideoChat = false"
+          ></app-video-chat>
+          <div class="chat-messages">
+            <div
+              *ngFor="let msg of messages"
+              [ngClass]="{
+                'message-bubble': true,
+                sent: msg.senderId === currentUserId,
+                received: msg.senderId !== currentUserId
+              }"
+            >
+              <div
+                class="message-sender-avatar"
+                *ngIf="msg.senderId !== currentUserId"
+              >
+                <img
+                  [src]="getProfilePicUrl(msg.senderId)"
+                  alt="Avatar"
+                  width="32"
+                  height="32"
+                />
+              </div>
+              <div class="message-content">
+                {{ msg.content }}
+              </div>
+              <div class="message-time">
+                {{ msg.timeStamp | date : "shortTime" }}
+              </div>
+            </div>
+          </div>
+
+          <form class="chat-input-area" (ngSubmit)="sendMessage()">
+            <button type="button" class="icon-btn" title="Attach files">
+              <i class="far fa-plus-square"></i>
+            </button>
+            <button type="button" class="icon-btn" title="Send image">
+              <i class="far fa-image"></i>
+            </button>
+            <button type="button" class="icon-btn" title="Send sticker">
+              <i class="far fa-sticky-note"></i>
+            </button>
+            <div class="message-input-wrapper">
+              <input
+                type="text"
+                [(ngModel)]="messageContent"
+                name="messageContent"
+                placeholder="Type a message..."
+              />
+              <button type="button" class="icon-btn emoji-btn" title="Emoji">
+                <i class="far fa-smile"></i>
+              </button>
+            </div>
+            <button type="submit" class="icon-btn" title="Send Message">
+              <i class="fas fa-paper-plane"></i>
+            </button>
+          </form>
+        </div>
+
+        <main class="insta-main" *ngIf="homePage">
+          <div class="insta-posts">
+            <div *ngIf="loadingFriendPosts" class="loading-indicator">
+              Loading posts...
+            </div>
+            <div
+              *ngIf="!loadingFriendPosts && friendPosts.length === 0"
+              class="empty-message"
+            >
+              No posts from friends yet.
+            </div>
+
+            <div class="insta-post" *ngFor="let post of friendPosts">
+              <div class="post-header">
+                <img
+                  [src]="post.profilePicUrl || defaultProfilePic"
+                  class="post-user-pic"
+                  alt="user"
+                />
+                <span class="post-username">{{ post.userName }}</span>
+              </div>
+
+              <img [src]="post.postUrl" class="post-img" alt="post" />
+
+              <div class="post-actions">
+                <span (click)="likepost(post.postId)" class="like-button">
+                  ❤️
+                  <span *ngIf="likeReturned?.like !== undefined">
+                    {{ likeReturned.like }}
+                  </span>
+                </span>
+                <span *ngIf="likeError" class="error-message">
+                  {{ likeError }}
+                </span>
+
+                <span>
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    strokeWidth="{1.5}"
+                    stroke="currentColor"
+                    className="size-6"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      d="M8.625 12a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H8.25m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0H12m4.125 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9 0 0 1-2.555-.337A5.972 5.972 0 0 1 5.41 20.97a5.969 5.969 0 0 1-.474-.065 4.48 4.48 0 0 0 .978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25Z"
+                    />
+                  </svg>
+                </span>
+              </div>
+
+              <div class="post-caption">&nbsp;{{ post.postAbout }}</div>
+
+              <div class="post-time">
+                <small>{{ post.postAt | date : "short" }}</small>
+              </div>
+            </div>
+          </div>
+        </main>
+      </div>
+    </div>
+  </body>
+</html>

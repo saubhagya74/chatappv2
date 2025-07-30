@@ -1,0 +1,176 @@
+body {
+  background: #f5f6fa;
+  font-family: "Segoe UI", Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.login-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+}
+
+.login-box {
+  background: #fff;
+  border-radius: 20px;
+  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
+  padding: 40px 32px 32px 32px;
+  width: 350px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.logo {
+  margin-bottom: 18px;
+}
+
+h2 {
+  margin: 0 0 8px 0;
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #222;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 1rem;
+  margin-bottom: 24px;
+}
+
+form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+label {
+  font-size: 0.98rem;
+  color: #222;
+  margin-bottom: 6px;
+  font-weight: 500;
+}
+
+input[type="email"],
+input[type="password"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  margin-bottom: 16px;
+  font-size: 1rem;
+  background: #f7f7f7;
+  outline: none;
+  transition: border 0.2s;
+}
+input[type="email"]:focus,
+input[type="password"]:focus {
+  border: 1.5px solid #222;
+}
+
+.password-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.forgot {
+  font-size: 0.95rem;
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+.forgot:hover {
+  text-decoration: underline;
+}
+
+.remember-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 18px;
+  gap: 8px;
+}
+
+.login-btn {
+  width: 100%;
+  background: #363942;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 12px 0;
+  font-size: 1.08rem;
+  font-weight: 600;
+  cursor: pointer;
+  margin-bottom: 18px;
+  transition: background 0.2s;
+}
+.login-btn:hover {
+  background: #222;
+}
+
+.divider {
+  width: 100%;
+  text-align: center;
+  border-bottom: 1px solid #e0e0e0;
+  line-height: 0.1em;
+  margin: 18px 0 18px 0;
+}
+.divider span {
+  background: #fff;
+  padding: 0 12px;
+  color: #888;
+  font-size: 0.98rem;
+}
+
+.social-login {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  margin-bottom: 18px;
+  justify-content: center;
+}
+.social-btn {
+  flex: 1;
+  background: #f3f3f3;
+  border: 1px solid #e0e0e0;
+  border-radius: 8px;
+  padding: 8px 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.2rem;
+  transition: background 0.2s, border 0.2s;
+}
+.social-btn:hover {
+  background: #e0e0e0;
+  border: 1.5px solid #222;
+}
+.social-btn.apple .icon {
+  font-size: 1.4rem;
+}
+.social-btn.google .icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.register {
+  color: #888;
+  font-size: 0.98rem;
+  margin-top: 8px;
+}
+.register a {
+  color: #3b82f6;
+  text-decoration: none;
+  font-weight: 500;
+}
+.register a:hover {
+  text-decoration: underline;
+}

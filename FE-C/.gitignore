@@ -1,0 +1,7 @@
+
+# Angular build output
+/dist/
+/.angular/
+/node_modules/
+
+.vscode/
