@@ -7,8 +7,6 @@ using Microsoft.IdentityModel.Tokens;
 using Scalar.AspNetCore;
 using System.Text;
 using System.Text.Json;
-using Microsoft.Extensions.FileProviders;
-using Microsoft.AspNetCore.StaticFiles;
 
 namespace app
 {
@@ -24,6 +22,7 @@ namespace app
             AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
             // 2. Controllers & SignalR
+            builder.Services.AddControllers();
             builder.Services.AddSingleton<SnowFlakeGen>();
             builder.Services.AddSignalR();
             builder.Services
@@ -31,17 +30,6 @@ namespace app
             .AddJsonOptions(opts =>
             {
                 opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
-            });
-
-            // Configure static files for profile pictures
-            builder.Services.Configure<StaticFileOptions>(options =>
-            {
-                options.ServeUnknownFileTypes = true;
-                var provider = new FileExtensionContentTypeProvider();
-                provider.Mappings[".jpeg"] = "image/jpeg";
-                provider.Mappings[".jpg"] = "image/jpeg";
-                provider.Mappings[".png"] = "image/png";
-                options.ContentTypeProvider = provider;
             });
 
 
@@ -87,11 +75,7 @@ namespace app
             {
                 options.AddPolicy("AllowAngularDevClient", policy =>
                 {
-                    policy.WithOrigins(
-                        "http://localhost:4200",
-                "http://192.168.206.1:4200",
-                "http://192.168.1.66:4200",
-                "http://192.168.100.1:4200")
+                    policy.WithOrigins("http://52.86.249.52")
                           .AllowAnyHeader()
                           .AllowAnyMethod()
                           .AllowCredentials(); // needed for cookies or SignalR
@@ -100,6 +84,15 @@ namespace app
 
             var app = builder.Build();
 
+            // Apply EF Core migrations at startup
+            using (var scope = app.Services.CreateScope())
+            {
+                var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+                db.Database.Migrate(); // This will apply any pending migrations to the database
+            }
+
+            app.Urls.Add("http://+:80");
+
             // 6. Middleware pipeline
             if (app.Environment.IsDevelopment())
             {
@@ -107,15 +100,11 @@ namespace app
                 app.MapScalarApiReference();
             }
 
-            app.UseHttpsRedirection();
-
-            // Serve static files (including profile pictures)
-            app.UseStaticFiles(new StaticFileOptions
+            if (app.Environment.IsDevelopment())
             {
-                FileProvider = new PhysicalFileProvider(
-                    Path.Combine(builder.Environment.WebRootPath)),
-                RequestPath = ""
-            });
+                app.UseHttpsRedirection();
+            }
+
 
             app.UseRouting(); //  Required before CORS/Auth
 
@@ -123,9 +112,9 @@ namespace app
 
             app.UseAuthentication();
             app.UseAuthorization();
-         
+
             app.MapControllers();
-            app.MapHub<ChatHub>("/ChatHub"); 
+            app.MapHub<ChatHub>("/ChatHub");
             app.MapHub<VideoChatHub>("/VideoChatHub"); //  Match Angular path exactly
 
             app.Run();
